@@ -1,31 +1,57 @@
 import React from 'react';
+import { Search as useSearch } from '../services/search';
 
-// `joiningDate` && `validityDate` format "yyyy-mm-dd"
 
-function checkValidity(joiningDate, validityDate) {
-	const now = new Date();
-	const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-	const [year, month, day] = joiningDate.split('-');
-	const [yyyy, mm, dd] = validityDate.split('-');
-	const maxValid = new Date(yyyy, mm - 1, dd);
-	const selected = new Date(year, month - 1, day);
-	return (maxValid >= selected) && (maxValid >= today);
-}
 
-function Search() {
+function Search({ db, state, setState, errors }) {
+
+
+	const [query, setQuery] = React.useState({
+		name: '',
+		joiningDate: '',
+	});
+
+
+	const SearchHandler = (e) => {
+		e.preventDefault();
+		const results = useSearch(db, query, errors);
+		if (results && !state.find((resident) => resident.name.toLowerCase() === results.name.toLowerCase())) {
+			setState([...state, results]);
+			document.getElementById('studentName').value = "";
+			document.getElementById('joiningDate').value = "";
+		}
+	}
+
 	return (
 		<div className="my-50 layout-row align-items-end justify-content-end">
 			<label htmlFor="studentName">Student Name:
 				<div>
-					<input id="studentName" data-testid="studentName" type="text" className="mr-30 mt-10"/>
+					<input
+						id="studentName"
+						data-testid="studentName"
+						type="text"
+						className="mr-30 mt-10"
+						onChange={(e) => setQuery({ ...query, name: e.target.value })}
+					/>
 				</div>
 			</label>
 			<label htmlFor="joiningDate">Joining Date:
 				<div>
-					<input id="joiningDate" data-testid="joiningDate" type="date" className="mr-30 mt-10"/>
+					<input
+						id="joiningDate"
+						data-testid="joiningDate"
+						type="date"
+						className="mr-30 mt-10"
+						onChange={(e) => setQuery({ ...query, joiningDate: e.target.value })}
+					/>
 				</div>
 			</label>
-			<button type="button" data-testid="addBtn" className="small mb-0">Add</button>
+			<button
+				type="button"
+				data-testid="addBtn"
+				className="small mb-0"
+				onClick={SearchHandler}
+			>Add</button>
 		</div>
 	);
 }
